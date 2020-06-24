@@ -55,8 +55,6 @@ class DataSet:
                                                                       batch_sizes=(self.batchsize,
                                                                                    self.batchsize,
                                                                                    self.batchsize),
-                                                                      device=torch.device(
-                                                                          'cpu'),
                                                                       sort_key=lambda x: len(
                                                                           x.title),
                                                                       sort_within_batch=True,

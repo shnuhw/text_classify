@@ -26,7 +26,7 @@ class Classifier:
             self.model = None
             self.vocab = None
         else:
-            self.model = self.net.load_state_dict(torch.load(self.model_path))
+            self.model = self.net.load_state_dict(torch.load(self.model_path)) 
             self.vocab = pickle.load(open(self.vocab_path, 'rb'))
 
     def train(self):
@@ -53,15 +53,18 @@ class Classifier:
                 # zero the parameter gradients
                 optimizer.zero_grad()
                 # print(inputs.dtype)
-                outputs = self.net(inputs)
+                if self.config.cuda:
+                    outputs = self.net(inputs.cuda())
+                else:
+                    outputs = self.net(inputs.cuda())
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
 
                 if batch_count % 100 == 0:
-                    true = labels.data.cpu()
-                    predict = torch.max(outputs.data, 1)[1].cpu()
-                    train_acc = accuracy_score(true, predict)
+                    true = labels.data
+                    predict = torch.max(outputs.data, 1)[1]
+                    train_acc = accuracy_score(true.cpu(), predict.cpu())
                     dev_acc, dev_loss = self.evaluate(test_iter)
                     if dev_loss < dev_best_loss:
                         dev_best_loss = dev_loss
@@ -90,7 +93,10 @@ class Classifier:
             for item in data_iter:
                 texts = item.title
                 labels = item.label
-                outputs = self.net(texts)
+                if self.config.cuda:
+                    outputs = self.net(texts.cuda())
+                else:    
+                    outputs = self.net(texts.cuda())
                 loss = nn.functional.cross_entropy(outputs, labels)
                 loss_total += loss
                 labels = labels.data.cpu().numpy()
@@ -105,28 +111,28 @@ class Classifier:
         #     return acc, loss_total / len(data_iter), report, confusion
         return acc, loss_total / len(data_iter)
 
-    def predict(self, text):
-
-        text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long)
+    def predict(self, text, cuda=False):
+        if cuda:
+            text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long).cuda()
+        else:
+            text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long)
         with torch.no_grad():
             outputs = self.net(text_vec)
             # labels = labels.data.cpu().numpy()
             predic = torch.max(outputs.data, 1)[1].cpu().numpy()
             return predic[0]
 
-        # acc = accuracy_score(labels_all, predict_all)
-
 
 class Config:
 
     def __init__(self):
         self.max_len = 20
-        self.batch_size = 100
+        self.batch_size = 64
         self.root_dir = '../../../data'
         self.train_file_name = 'train.csv'
         self.test_file_name = 'test.csv'
         self.eval_file_name = 'valid.csv'
-        self.num_epoch = 5
+        self.num_epoch = 20
 
 
 if __name__ == '__main__':
@@ -139,8 +145,7 @@ if __name__ == '__main__':
                       )
     num_label = len(dataset.label_vocab)
     vocab_size = len(dataset.vocab)
-    text = '中石化大涨7% 唱的是哪出戏'
-    cnn = TextCNN(vocab_size, num_label)
+    cnn = TextCNN(vocab_size, num_label).cuda()
     clf = Classifier(
         cnn,
         config,
@@ -148,5 +153,10 @@ if __name__ == '__main__':
         model_dir='../../../model/test/',
         is_train=False)
     # clf.train()
-    r = clf.predict(text)
+    text = '中石化大涨7% 唱的是哪出戏'
+    import time
+    time_start = time.time()
+    r = clf.predict(text, True)
+    time_cost = time.time() - time_start
+    print(time_cost)
     print(dataset.label_vocab.itos[r])
