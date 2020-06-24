@@ -10,12 +10,12 @@ from torch import nn
 
 class TextLSTM(nn.Module):
 
-    def __init__(self, input_dim, output_dim, embedding_dim=128, n_hidden=1):
+    def __init__(self, vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=1):
         super(TextLSTM, self).__init__()
-        self.embedding = nn.Embedding(input_dim, embedding_dim)
-        self.lstm = nn.LSTM(input_size=128, hidden_size=256, num_layers=n_hidden)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers, bidirectional=True)
         self.dropout = nn.Dropout()
-        self.linear = nn.Linear(256, output_dim)
+        self.linear = nn.Linear(hidden_size*2*input_size, output_dim)
         self.softmax = nn.Softmax()
 
     def forward(self, x):

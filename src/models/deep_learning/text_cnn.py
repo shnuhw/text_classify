@@ -11,9 +11,9 @@ from torch import nn
 
 class TextCNN(nn.Module):
 
-    def __init__(self, input_dim, class_num, embedding_dim=256, num_filters=128, filter_sizes=(2, 3, 4, 5), dropout=0.5):
+    def __init__(self, vocab_size, class_num, embedding_dim=256, num_filters=128, filter_sizes=(2, 3, 4, 5), dropout=0.5):
         super(TextCNN, self).__init__()
-        self.embedding = nn.Embedding(input_dim, embedding_dim)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.convs = nn.ModuleList([nn.Conv2d(1, num_filters, (k, embedding_dim)) for k in filter_sizes])
         self.dropout = nn.Dropout(dropout)
         self.linear = nn.Linear(num_filters * len(filter_sizes), class_num)

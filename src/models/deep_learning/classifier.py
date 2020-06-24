@@ -56,7 +56,7 @@ class Classifier:
                 if self.config.cuda:
                     outputs = self.net(inputs.cuda())
                 else:
-                    outputs = self.net(inputs.cuda())
+                    outputs = self.net(inputs)
                 loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
@@ -96,7 +96,7 @@ class Classifier:
                 if self.config.cuda:
                     outputs = self.net(texts.cuda())
                 else:    
-                    outputs = self.net(texts.cuda())
+                    outputs = self.net(texts)
                 loss = nn.functional.cross_entropy(outputs, labels)
                 loss_total += loss
                 labels = labels.data.cpu().numpy()
@@ -133,10 +133,12 @@ class Config:
         self.test_file_name = 'test.csv'
         self.eval_file_name = 'valid.csv'
         self.num_epoch = 20
+        self.cuda = False
 
 
 if __name__ == '__main__':
     from text_cnn import TextCNN
+    from lstm import TextLSTM
     config = Config()
     dataset = DataSet(config.max_len, config.batch_size, config.root_dir,
                       config.train_file_name,
@@ -145,18 +147,20 @@ if __name__ == '__main__':
                       )
     num_label = len(dataset.label_vocab)
     vocab_size = len(dataset.vocab)
-    cnn = TextCNN(vocab_size, num_label).cuda()
+    # cnn = TextCNN(vocab_size, num_label).cuda()
+    lstm = TextLSTM(vocab_size, config.max_len, num_label)
     clf = Classifier(
-        cnn,
+        lstm,
         config,
         dataset,
-        model_dir='../../../model/test/',
-        is_train=False)
-    # clf.train()
-    text = '中石化大涨7% 唱的是哪出戏'
-    import time
-    time_start = time.time()
-    r = clf.predict(text, True)
-    time_cost = time.time() - time_start
-    print(time_cost)
-    print(dataset.label_vocab.itos[r])
+        model_dir='../../../model/test_lstm/',
+        is_train=True)
+    clf.train()
+
+    # text = '中石化大涨7% 唱的是哪出戏'
+    # import time
+    # time_start = time.time()
+    # r = clf.predict(text, True)
+    # time_cost = time.time() - time_start
+    # print(time_cost)
+    # print(dataset.label_vocab.itos[r])
