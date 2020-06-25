@@ -15,7 +15,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 import xgboost as xgb
 
-from ..evaluate import evaluate
+from ..utils.evaluate import evaluate
 
 feature_select_dict = {
     'count': CountVectorizer,

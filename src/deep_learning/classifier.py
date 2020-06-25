@@ -10,7 +10,7 @@ from torch import nn, optim
 import torch
 from sklearn.metrics import accuracy_score
 import numpy as np
-from dataset import DataSet
+from .dataset import DataSet
 
 
 class Classifier:
@@ -36,11 +36,11 @@ class Classifier:
         optimizer = optim.Adam(self.net.parameters(), lr=0.001)
 
         train_iter, test_iter, eval_iter = self.dataset.get_batch_data()
-        pickle.dump(dataset.vocab, open(self.vocab_path, 'wb'))
+        pickle.dump(self.dataset.vocab, open(self.vocab_path, 'wb'))
 
         print('training...')
         batch_count = 0
-        num_epochs = self.config.num_epoch
+        num_epochs = self.config.epochs
         dev_best_loss = float('inf')
         for epoch in range(num_epochs):  # loop over the dataset multiple times
 

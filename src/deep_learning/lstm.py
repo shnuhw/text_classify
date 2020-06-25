@@ -22,7 +22,9 @@ class TextLSTM(nn.Module):
         embedding = self.embedding(x)
         lstm_input = embedding.permute(1, 0, 2)
         output, (h, c) = self.lstm(lstm_input)
+        # print(output.size())
         linear_input = torch.cat([output[i, :, :] for i in range(output.shape[0])], dim=1)
+        # print(linear_input.size())
         linear_output = self.linear(linear_input)
         final_output = self.softmax(linear_output)
         return final_output

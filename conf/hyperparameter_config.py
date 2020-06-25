@@ -15,7 +15,10 @@ class TrainConfig:
         self.early_stopping_patience = 8
         self.reduce_lr_factor = 0.1
         self.reduce_lr_patience = 2
-        self.max_len = 256
+        self.max_len = 20
+        self.train_file_dir = './data'
+        self.model_file_dir = './model/test_lstm'
+        self.cuda = False
 
 
 class LSTMConfig:

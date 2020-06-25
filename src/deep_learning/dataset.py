@@ -11,9 +11,8 @@ import pickle
 
 class DataSet:
 
-    def __init__(self, max_length, batch_size, root_dir_path, train_file_path, test_file_path,
-                      val_file_path):
-
+    def __init__(self, max_length, batch_size, root_dir_path, train_file_name='train.csv', test_file_name='test.csv',
+                 val_file_name='valid.csv'):
         self.max_len = max_length
         self.batchsize = batch_size
         self.train_dataset = None
@@ -21,11 +20,10 @@ class DataSet:
         self.eval_dataset = None
         self.vocab = []
         self.embedding = {}
-        self._init_dataset(root_dir_path, train_file_path, test_file_path, val_file_path)
+        self._init_dataset(root_dir_path, train_file_name, test_file_name, val_file_name)
 
     def _init_dataset(self, root_dir_parh, train_file_path, test_file_path,
                       val_file_path, w2v_file_path=None):
-
         def tokenizer(text):
             return [word for word in text]
 
@@ -48,7 +46,6 @@ class DataSet:
         # pickle.dump(self.vocab, open('./test.pkl', 'wb'))
 
     def get_batch_data(self):
-
         train_iter, eval_iter, test_iter = data.BucketIterator.splits((self.train_dataset,
                                                                        self.val_dataset,
                                                                        self.test_dataset),
