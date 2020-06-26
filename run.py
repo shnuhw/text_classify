@@ -2,7 +2,7 @@
 
 from src.deep_learning.classifier import Classifier as DlClassifier
 from src.machine_learning.classifier import Classifier as MlClassifier
-from src.deep_learning import lstm, text_cnn, dataset
+from src.deep_learning import lstm, text_cnn, dataset, lstm_attention
 from conf.hyperparameter_config import TrainConfig, LSTMConfig, TextCNNConfig
 
 
@@ -13,9 +13,10 @@ def main():
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
     # cnn = TextCNN(vocab_size, num_label).cuda()
-    lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
+    # lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
+    lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
     clf = DlClassifier(
-        lstm_net,
+        lstm_atte_net,
         train_config,
         mydataset,
         model_dir=train_config.model_file_dir,
