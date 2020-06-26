@@ -18,7 +18,7 @@ class TrainConfig:
         self.max_len = 20
         self.train_file_dir = './data'
         self.model_file_dir = './model/test_lstm'
-        self.cuda = False
+        self.cuda = True
 
 
 class LSTMConfig:

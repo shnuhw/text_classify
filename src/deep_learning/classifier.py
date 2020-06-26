@@ -5,6 +5,7 @@
 
 import os
 import pickle
+import time
 
 from torch import nn, optim
 import torch
@@ -39,6 +40,7 @@ class Classifier:
         pickle.dump(self.dataset.vocab, open(self.vocab_path, 'wb'))
 
         print('training...')
+        time_start = time_batch_start = time_epoch_start = time.time()
         batch_count = 0
         num_epochs = self.config.epochs
         dev_best_loss = float('inf')
@@ -47,6 +49,7 @@ class Classifier:
             print('Epoch [{}/{}]'.format(epoch + 1, num_epochs))
 
             for index, train_item in enumerate(train_iter):
+                
                 inputs = train_item.title
                 labels = train_item.label
 
@@ -55,9 +58,10 @@ class Classifier:
                 # print(inputs.dtype)
                 if self.config.cuda:
                     outputs = self.net(inputs.cuda())
+                    loss = criterion(outputs, labels.cuda())
                 else:
                     outputs = self.net(inputs)
-                loss = criterion(outputs, labels)
+                    loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
 
@@ -70,19 +74,23 @@ class Classifier:
                         dev_best_loss = dev_loss
                         torch.save(
                             self.net.state_dict(), self.model_path)
-
+                    batch_100_cost = time.time() - time_batch_start
                     msg = 'Iter: {0:>6},  Train Loss: {1:>5.2},  Train Acc: {2:>6.2%},  Val Loss: {3:>5.2},  ' \
-                          'Val Acc: {4:>6.2%}'
+                          'Val Acc: {4:>6.2%}, Time Cost: {5:>6.4}'
                     print(
                         msg.format(
                             batch_count,
                             loss.item(),
                             train_acc,
                             dev_loss,
-                            dev_acc))
-
+                            dev_acc,
+                            batch_100_cost))
                     self.net.train()
+                    time_batch_start = time.time()
                 batch_count += 1
+            time_epoch_cost = time.time() - time_epoch_start
+            print('Epoch [{}/{}] Time cost: {:6.4}'.format(epoch + 1, num_epochs, time_epoch_cost))
+            time_epoch_start = time.time()
 
     def evaluate(self, data_iter):
         self.net.eval()
@@ -95,9 +103,10 @@ class Classifier:
                 labels = item.label
                 if self.config.cuda:
                     outputs = self.net(texts.cuda())
+                    loss = nn.functional.cross_entropy(outputs, labels.cuda())
                 else:    
                     outputs = self.net(texts)
-                loss = nn.functional.cross_entropy(outputs, labels)
+                    loss = nn.functional.cross_entropy(outputs, labels)
                 loss_total += loss
                 labels = labels.data.cpu().numpy()
                 predic = torch.max(outputs.data, 1)[1].cpu().numpy()

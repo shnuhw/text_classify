@@ -13,7 +13,7 @@ def main():
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
     # cnn = TextCNN(vocab_size, num_label).cuda()
-    lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
+    lstm_net = lstm.TextLSTM(vocab_size, train_config.max_len, num_label).cuda()
     clf = DlClassifier(
         lstm_net,
         train_config,
