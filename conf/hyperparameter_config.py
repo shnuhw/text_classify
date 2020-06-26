@@ -8,7 +8,7 @@ class TrainConfig:
 
     def __init__(self):
         self.optimizer = "adam"
-        self.lr = 0.01
+        self.lr = 0.001
         self.epochs = 50
         self.batch_size = 64
         self.validation_split = 0.2
@@ -17,8 +17,8 @@ class TrainConfig:
         self.reduce_lr_patience = 2
         self.max_len = 20
         self.train_file_dir = './data'
-        self.model_file_dir = './model/test_lstm_atten'
-        self.cuda = False
+        self.model_file_dir = './model/test'
+        self.cuda = True
 
 
 class LSTMConfig:

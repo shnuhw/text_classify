@@ -12,12 +12,15 @@ def main():
     mydataset = dataset.DataSet(train_config.max_len, train_config.batch_size, train_config.train_file_dir)
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
-    # cnn = TextCNN(vocab_size, num_label).cuda()
+    cnn = text_cnn.TextCNN(vocab_size, num_label).cuda()
     # lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
-    lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
+    # if train_config.cuda:
+    #     lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label).cuda()
+    # else:
+    #     lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
 
     clf = DlClassifier(
-        lstm_atte_net,
+        cnn,
         train_config,
         mydataset,
         model_dir=train_config.model_file_dir,

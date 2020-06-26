@@ -15,9 +15,10 @@ class TextLSTMAttention(nn.Module):
         super(TextLSTMAttention, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers,
+                            dropout=0.5,
                             batch_first=True,
                             bidirectional=True)
-        self.dropout = nn.Dropout()
+        self.dropout = nn.Dropout(p=0.3)
         self.linear = nn.Linear(hidden_size*2, 64)
         self.linear2 = nn.Linear(64, output_dim)
         self.softmax = nn.Softmax()
