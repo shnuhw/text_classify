@@ -15,6 +15,7 @@ def main():
     # cnn = TextCNN(vocab_size, num_label).cuda()
     # lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
     lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
+
     clf = DlClassifier(
         lstm_atte_net,
         train_config,
