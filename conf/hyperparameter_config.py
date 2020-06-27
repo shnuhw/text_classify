@@ -17,7 +17,7 @@ class TrainConfig:
         self.reduce_lr_patience = 2
         self.max_len = 20
         self.train_file_dir = './data'
-        self.model_file_dir = './model/test'
+        self.model_file_dir = './model/test_lstm_atten'
         self.cuda = True
 
 
