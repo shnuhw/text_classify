@@ -50,7 +50,7 @@ class Classifier:
 
             for index, train_item in enumerate(train_iter):
                 
-                inputs = train_item.title
+                inputs = train_item.text
                 labels = train_item.label
 
                 # zero the parameter gradients
@@ -99,7 +99,7 @@ class Classifier:
         labels_all = np.array([], dtype=int)
         with torch.no_grad():
             for item in data_iter:
-                texts = item.title
+                texts = item.text
                 labels = item.label
                 if self.config.cuda:
                     outputs = self.net(texts.cuda())

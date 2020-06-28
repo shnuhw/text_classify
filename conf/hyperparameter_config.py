@@ -15,9 +15,9 @@ class TrainConfig:
         self.early_stopping_patience = 8
         self.reduce_lr_factor = 0.1
         self.reduce_lr_patience = 2
-        self.max_len = 20
+        self.max_len = 512
         self.train_file_dir = './data'
-        self.model_file_dir = './model/test_lstm_atten'
+        self.model_file_dir = './model/test'
         self.cuda = True
 
 
@@ -25,7 +25,7 @@ class LSTMConfig:
 
     def __init__(self):
         self.embedding_dim = 300
-        self.max_len = 20
+        self.max_len = 512
         self.hidden_size = 256
         self.num_layers = 1
 
@@ -37,4 +37,4 @@ class TextCNNConfig:
         self.num_filter = 128
         self.filter_sizes = (2, 3, 4, 5)
         self.dropout = 0.5
-        self.max_len = 20
+        self.max_len = 512

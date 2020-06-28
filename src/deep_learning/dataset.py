@@ -31,7 +31,7 @@ class DataSet:
                           batch_first=True,
                           fix_length=self.max_len)
         LABLE = data.Field(sequential=False, use_vocab=True)
-        datafields = [(None, None), ("title", TEXT), ("text", None),
+        datafields = [(None, None), ("title", None), ("text", TEXT),
                       ("label", LABLE), ("file_name", None)]
         self.train_dataset, self.val_dataset, self.test_dataset = data.TabularDataset.splits(path=root_dir_parh,
                                                                                              train=train_file_path,
@@ -53,7 +53,7 @@ class DataSet:
                                                                                    self.batchsize,
                                                                                    self.batchsize),
                                                                       sort_key=lambda x: len(
-                                                                          x.title),
+                                                                          x.text),
                                                                       sort_within_batch=True,
                                                                       repeat=False,
                                                                       shuffle=True

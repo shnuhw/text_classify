@@ -11,11 +11,11 @@ import torch.nn.functional as F
 
 class TextLSTMAttention(nn.Module):
 
-    def __init__(self, vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=3):
+    def __init__(self, vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=1):
         super(TextLSTMAttention, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers,
-                            dropout=0.1,
+                            dropout=0.,
                             batch_first=True,
                             bidirectional=True)
         self.dropout = nn.Dropout(p=0.3)
