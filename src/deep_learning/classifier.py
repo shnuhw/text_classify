@@ -58,6 +58,7 @@ class Classifier:
                 # print(inputs.dtype)
                 if self.config.cuda:
                     outputs = self.net(inputs.cuda())
+                    # print(outputs.size(), 'qqqqqqq')
                     loss = criterion(outputs, labels.cuda())
                 else:
                     outputs = self.net(inputs)

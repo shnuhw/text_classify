@@ -2,7 +2,6 @@
 # author: hanwei
 # file: transformer.py
 # time: 2020/6/28 17:58
-from __future__ import annotations
 
 import torch
 from torch import nn
@@ -12,18 +11,25 @@ import math
 
 class Transformer(nn.Module):
 
-    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim):
+    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim, batch_size=64):
         super(Transformer, self).__init__()
         self.encoder = Encoder(vocab_size, seq_len, embedding_dim, num_head, hidden_size)
-        self.fc = nn.Linear(embedding_dim, out_dim)
+        self.fc = nn.Linear(embedding_dim * embedding_dim * 2, out_dim)
         self.encoder_num = encoder_num
+        self.batch_size = batch_size
+        self.embedding_dim = embedding_dim
 
     def forward(self, x):
 
-        for i in range(self.encoder_num):
-            out = self.encoder(x, i)
+        out = self.encoder(x, True)
 
+        for i in range(self.encoder_num-1):
+            out = self.encoder(out, False)
+        
+        out = out.view(self.batch_size, self.embedding_dim * self.embedding_dim)
+        # print(out.size(), '11111111111')
         out = self.fc(out)
+        # print(out.size(), '22222222222')
 
         return out
 
@@ -61,9 +67,9 @@ class PositionEncoding(nn.Module):
 
     def forward(self, x):
 
-        assert x.size() == self.PE.size()
+        #assert x.size() == self.pe.size()
 
-        return self.x + self.PE
+        return x + nn.Parameter(self.pe, requires_grad=False).to('cuda')
 
 
 class ScaledDotProductAttention(nn.Module):
@@ -75,8 +81,8 @@ class ScaledDotProductAttention(nn.Module):
         self.k_dim = k_dim
 
     def forward(self, K, Q, V):
-        out = self.softmax(torch.mm(Q, K.permute(0, 2, 1))/math.sqrt(self.k_dim))
-        out = torch.mm(out, V)
+        out = self.softmax(torch.matmul(Q, K.permute(0, 2, 1))/math.sqrt(self.k_dim))
+        out = torch.matmul(out, V)
         return out
 
 
@@ -111,8 +117,8 @@ class MultiHeadAttention(nn.Module):
         attention_list = []
         for q, k, v in zip(q_head_list, k_head_list, v_head_list):
             attention_list.append(self.attention(q, k, v))
-
-        Z = torch.cat(attention_list, dim=1)
+        # print(len(attention_list), attention_list[0].size(), '0000000')
+        Z = torch.cat(attention_list, dim=2)
         out = self.fc_last(Z)
 
         out = out + x  # 残差连接

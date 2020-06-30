@@ -18,7 +18,7 @@ def main():
     #    lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label).cuda()
     # else:
     #     lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
-    net = transformer.Transformer(vocab_size, net_config.max_len, 512, 8, 128, 6, num_label)
+    net = transformer.Transformer(vocab_size, net_config.max_len, 512, 8, 128, 2, num_label).cuda()
     clf = DlClassifier(
         net,
         train_config,
