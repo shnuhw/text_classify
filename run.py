@@ -1,29 +1,36 @@
 #!/usr/bin/env python
 
+import torch
+
 from src.deep_learning.classifier import Classifier as DlClassifier
-from src.machine_learning.classifier import Classifier as MlClassifier
-from src.deep_learning import lstm, text_cnn, dataset, lstm_attention, transformer
-from conf.hyperparameter_config import TrainConfig, LSTMConfig, TextCNNConfig
+from src.deep_learning import dataset
+from conf.net_select import net_dict
+
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
 
-def main():
-    net_config = LSTMConfig()
-    train_config = TrainConfig()
-    mydataset = dataset.DataSet(train_config.max_len, train_config.batch_size, train_config.train_file_dir)
+def main(net_name):
+
+    assert net_name in net_dict
+
+    train_conf = net_dict['train_conf']
+    train_conf.device = device
+
+    net_class = net_dict[net_name]['net']
+    net_config = net_dict[net_name]['conf']()
+
+    mydataset = dataset.DataSet(train_conf.max_len, train_conf.batch_size, train_conf.train_file_dir)
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
-    # cnn = text_cnn.TextCNN(vocab_size, num_label).cuda()
-    # lstm_net = lstm.TextLSTM(vocab_size, net_config.max_len, num_label)
-    # if train_config.cuda:
-    #    lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label).cuda()
-    # else:
-    #     lstm_atte_net = lstm_attention.TextLSTMAttention(vocab_size, net_config.max_len, num_label)
-    net = transformer.Transformer(vocab_size, net_config.max_len, 512, 8, 128, 2, num_label).cuda()
+
+    net_config.vocab_size = vocab_size
+    net_config.seq_len = num_label
+
+    net = net_class(net_config).to(device)
     clf = DlClassifier(
         net,
-        train_config,
         mydataset,
-        model_dir=train_config.model_file_dir,
+        train_conf,
         is_train=True)
     for name, parameters in clf.net.named_parameters():
         print(name, ':', parameters.size())
@@ -31,4 +38,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    import sys
+    net_name = sys.argv[0]
+    main(net_name)

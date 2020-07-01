@@ -17,7 +17,7 @@ class TrainConfig:
         self.reduce_lr_patience = 2
         self.max_len = 512
         self.train_file_dir = './data'
-        self.model_file_dir = './model/test_transformer1'
+        self.model_dir = './model/test_transformer1'
         self.cuda = True
 
 
@@ -38,3 +38,12 @@ class TextCNNConfig:
         self.filter_sizes = (2, 3, 4, 5)
         self.dropout = 0.5
         self.max_len = 512
+
+
+class TransformerConfig:
+
+    def __init__(self):
+        self.embedding_dim = 512
+        self.num_head = 8
+        self.hidden_size = 256
+        self.encoder_num = 2

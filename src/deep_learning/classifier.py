@@ -16,13 +16,21 @@ from .dataset import DataSet
 
 class Classifier:
 
-    def __init__(self, net, epochs, cuda, data_set, model_dir, is_train=True):
+    def __init__(self, net, data_set, config, is_train=True):
+        """
+
+        :param net:
+        :param data_set:
+        :param config: Object: model_dir, epochs, device
+        :param is_train:
+        """
+
+        self.model_dir = config.model_dir
+        self.epochs = config.epochs
+        self.device = config.device
+
         self.net = net
-        # self.config = config
-        self.model_dir = model_dir
         self.dataset = data_set
-        self.epochs = epochs
-        self.cuda = cuda
         self.model_path = self.model_dir + '/model.model'
         self.vocab_path = self.model_dir + '/vocab.pkl'
         if is_train:
@@ -52,19 +60,14 @@ class Classifier:
 
             for index, train_item in enumerate(train_iter):
                 
-                inputs = train_item.text
-                labels = train_item.label
+                inputs = train_item.text.to(self.device)
+                labels = train_item.label.to(self.device)
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
                 # print(inputs.dtype)
-                if self.cuda:
-                    outputs = self.net(inputs.cuda())
-                    # print(outputs.size(), 'qqqqqqq')
-                    loss = criterion(outputs, labels.cuda())
-                else:
-                    outputs = self.net(inputs)
-                    loss = criterion(outputs, labels)
+                outputs = self.net(inputs)
+                loss = criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
 
@@ -102,14 +105,10 @@ class Classifier:
         labels_all = np.array([], dtype=int)
         with torch.no_grad():
             for item in data_iter:
-                texts = item.text
-                labels = item.label
-                if self.config.cuda:
-                    outputs = self.net(texts.cuda())
-                    loss = nn.functional.cross_entropy(outputs, labels.cuda())
-                else:    
-                    outputs = self.net(texts)
-                    loss = nn.functional.cross_entropy(outputs, labels)
+                texts = item.text.to(self.device)
+                labels = item.labelto(self.device)
+                outputs = self.net(texts)
+                loss = nn.functional.cross_entropy(outputs, labels)
                 loss_total += loss
                 labels = labels.data.cpu().numpy()
                 predic = torch.max(outputs.data, 1)[1].cpu().numpy()
@@ -123,11 +122,9 @@ class Classifier:
         #     return acc, loss_total / len(data_iter), report, confusion
         return acc, loss_total / len(data_iter)
 
-    def predict(self, text, cuda=False):
-        if cuda:
-            text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long).cuda()
-        else:
-            text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long)
+    def predict(self, text, device='cpu'):
+
+        text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long).to(device)
         with torch.no_grad():
             outputs = self.net(text_vec)
             # labels = labels.data.cpu().numpy()
@@ -148,31 +145,3 @@ class Config:
         self.cuda = False
 
 
-if __name__ == '__main__':
-    from text_cnn import TextCNN
-    from lstm import TextLSTM
-    config = Config()
-    dataset = DataSet(config.max_len, config.batch_size, config.root_dir,
-                      config.train_file_name,
-                      config.test_file_name,
-                      config.eval_file_name,
-                      )
-    num_label = len(dataset.label_vocab)
-    vocab_size = len(dataset.vocab)
-    # cnn = TextCNN(vocab_size, num_label).cuda()
-    lstm = TextLSTM(vocab_size, config.max_len, num_label)
-    clf = Classifier(
-        lstm,
-        config,
-        dataset,
-        model_dir='../../../model/test_lstm/',
-        is_train=True)
-    clf.train()
-
-    # text = '中石化大涨7% 唱的是哪出戏'
-    # import time
-    # time_start = time.time()
-    # r = clf.predict(text, True)
-    # time_cost = time.time() - time_start
-    # print(time_cost)
-    # print(dataset.label_vocab.itos[r])

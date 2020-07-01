@@ -7,15 +7,30 @@
 import torch
 from torch import nn
 
+"vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=1"
+
 
 class TextLSTM(nn.Module):
 
-    def __init__(self, vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=1):
+    def __init__(self, config):
+        """
+
+        :param config: Object
+            vocab_size
+            input_size
+            output_dim
+            embedding_dim=300
+            hidden_size=256
+            num_layers=1
+        """
         super(TextLSTM, self).__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(input_size=embedding_dim, hidden_size=hidden_size, num_layers=num_layers, bidirectional=True)
+        self.embedding = nn.Embedding(config.vocab_size, config.embedding_dim)
+        self.lstm = nn.LSTM(input_size=config.seq_len,
+                            hidden_size=config.hidden_size,
+                            num_layers=config.num_layers,
+                            bidirectional=True)
         self.dropout = nn.Dropout()
-        self.linear = nn.Linear(hidden_size*2*input_size, output_dim)
+        self.linear = nn.Linear(config.hidden_size*2*config.seq_len, config.output_dim)
         self.softmax = nn.Softmax()
 
     def forward(self, x):
