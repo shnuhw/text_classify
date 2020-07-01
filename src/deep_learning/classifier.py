@@ -16,11 +16,13 @@ from .dataset import DataSet
 
 class Classifier:
 
-    def __init__(self, net, config, data_set, model_dir, is_train=True):
+    def __init__(self, net, epochs, cuda, data_set, model_dir, is_train=True):
         self.net = net
-        self.config = config
+        # self.config = config
         self.model_dir = model_dir
         self.dataset = data_set
+        self.epochs = epochs
+        self.cuda = cuda
         self.model_path = self.model_dir + '/model.model'
         self.vocab_path = self.model_dir + '/vocab.pkl'
         if is_train:
@@ -40,9 +42,9 @@ class Classifier:
         pickle.dump(self.dataset.vocab, open(self.vocab_path, 'wb'))
 
         print('training...')
-        time_start = time_batch_start = time_epoch_start = time.time()
+        time_batch_start = time_epoch_start = time.time()
         batch_count = 0
-        num_epochs = self.config.epochs
+        num_epochs = self.epochs
         dev_best_loss = float('inf')
         for epoch in range(num_epochs):  # loop over the dataset multiple times
 
@@ -56,7 +58,7 @@ class Classifier:
                 # zero the parameter gradients
                 optimizer.zero_grad()
                 # print(inputs.dtype)
-                if self.config.cuda:
+                if self.cuda:
                     outputs = self.net(inputs.cuda())
                     # print(outputs.size(), 'qqqqqqq')
                     loss = criterion(outputs, labels.cuda())

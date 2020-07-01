@@ -12,10 +12,12 @@ import copy
 
 class Transformer(nn.Module):
 
-    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim, batch_size=64):
+    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size,
+                 encoder_num, out_dim, batch_size=64):
         super(Transformer, self).__init__()
         self.encoder = Encoder(vocab_size, seq_len, embedding_dim, num_head, hidden_size)
-        self.fc = nn.Linear(embedding_dim * embedding_dim, out_dim)
+        self.fc1 = nn.Linear(embedding_dim * embedding_dim, embedding_dim)
+        self.fc2 = nn.Linear(embedding_dim, out_dim)
         self.encoder_num = encoder_num
         self.batch_size = batch_size
         self.embedding_dim = embedding_dim
@@ -26,12 +28,10 @@ class Transformer(nn.Module):
 
         for i in range(self.encoder_num-1):
             out = self.encoder(out, False)
-        
-        # print(out.size(), '11111111111')
-        out = out.view(out.size()[0], -1) 
-        # print(out.size(), '11111111111')
-        out = self.fc(out)
-        # print(out.size(), '22222222222')
+
+        out = out.view(out.size()[0], -1)
+        out = self.fc1(out)
+        out = self.fc2(out)
 
         return out
 
