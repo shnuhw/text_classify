@@ -7,6 +7,7 @@ import torch
 from torch import nn
 import numpy as np
 import math
+import copy
 
 
 class Transformer(nn.Module):
@@ -14,7 +15,7 @@ class Transformer(nn.Module):
     def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim, batch_size=64):
         super(Transformer, self).__init__()
         self.encoder = Encoder(vocab_size, seq_len, embedding_dim, num_head, hidden_size)
-        self.fc = nn.Linear(embedding_dim * embedding_dim * 2, out_dim)
+        self.fc = nn.Linear(embedding_dim * embedding_dim, out_dim)
         self.encoder_num = encoder_num
         self.batch_size = batch_size
         self.embedding_dim = embedding_dim
@@ -26,7 +27,8 @@ class Transformer(nn.Module):
         for i in range(self.encoder_num-1):
             out = self.encoder(out, False)
         
-        out = out.view(self.batch_size, self.embedding_dim * self.embedding_dim)
+        # print(out.size(), '11111111111')
+        out = out.view(out.size()[0], -1) 
         # print(out.size(), '11111111111')
         out = self.fc(out)
         # print(out.size(), '22222222222')
@@ -67,7 +69,8 @@ class PositionEncoding(nn.Module):
 
     def forward(self, x):
 
-        #assert x.size() == self.pe.size()
+        # assert x.size() == self.pe.size()
+        # print(x.size(), self.pe.size())
 
         return x + nn.Parameter(self.pe, requires_grad=False).to('cuda')
 
@@ -97,9 +100,12 @@ class MultiHeadAttention(nn.Module):
 
         self.num_head = num_head
         self.head_dim = embedding_dim // self.num_head
-        self.head_WQ = nn.Linear(embedding_dim, self.head_dim)
-        self.head_WK = nn.Linear(embedding_dim, self.head_dim)
-        self.head_WV = nn.Linear(embedding_dim, self.head_dim)
+        self.head_WQ = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        self.head_WK = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        self.head_WV = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        # self.head_WK = nn.Linear(embedding_dim, self.head_dim)
+        # self.head_WV = nn.Linear(embedding_dim, self.head_dim)
+        self.embedding_dim = embedding_dim
 
         self.attention = ScaledDotProductAttention(self.head_dim)
 
@@ -111,14 +117,18 @@ class MultiHeadAttention(nn.Module):
         Q = self.fc_WQ(x)
         K = self.fc_WK(x)
         V = self.fc_WV(x)
-        q_head_list = [self.head_WQ(Q) for i in range(self.num_head)]
-        k_head_list = [self.head_WK(K) for i in range(self.num_head)]
-        v_head_list = [self.head_WV(V) for i in range(self.num_head)]
+        # q_head_list = [nn.Linear(self.embedding_dim, self.head_dim).cuda()(Q) for i in range(self.num_head)]
+        # k_head_list = [nn.Linear(self.embedding_dim, self.head_dim).cuda()(K) for i in range(self.num_head)]
+        # v_head_list = [nn.Linear(self.embedding_dim, self.head_dim).cuda()(V) for i in range(self.num_head)]
+        # q_head_list = [copy.deepcopy(self.head_WQ(Q)) for i in range(self.num_head)]
+        # k_head_list = [copy.deepcopy(self.head_WK(K)) for i in range(self.num_head)]
+        # v_head_list = [copy.deepcopy(self.head_WV(V)) for i in range(self.num_head)]
         attention_list = []
-        for q, k, v in zip(q_head_list, k_head_list, v_head_list):
-            attention_list.append(self.attention(q, k, v))
+        for q, k, v in zip(self.head_WQ, self.head_WK, self.head_WV):
+            attention_list.append(self.attention(q(Q), k(K), v(V)))
         # print(len(attention_list), attention_list[0].size(), '0000000')
         Z = torch.cat(attention_list, dim=2)
+        # print(len(attention_list), Z.size(), '0000000')
         out = self.fc_last(Z)
 
         out = out + x  # 残差连接
