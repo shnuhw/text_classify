@@ -21,7 +21,7 @@ net_dict = {
     },
     'transformer': {
         'net': transformer.Transformer,
-        'conf': LSTMConfig
+        'conf': TransformerConfig
     },
 
     'train_conf': TrainConfig

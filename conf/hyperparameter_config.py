@@ -10,7 +10,7 @@ class TrainConfig:
         self.optimizer = "adam"
         self.lr = 0.001
         self.epochs = 50
-        self.batch_size = 64
+        self.batch_size = 128
         self.validation_split = 0.2
         self.early_stopping_patience = 8
         self.reduce_lr_factor = 0.1
@@ -34,7 +34,7 @@ class TextCNNConfig:
 
     def __init__(self):
         self.embedding_dim = 300
-        self.num_filter = 128
+        self.num_filters = 128
         self.filter_sizes = (2, 3, 4, 5)
         self.dropout = 0.5
         self.max_len = 512
@@ -47,3 +47,4 @@ class TransformerConfig:
         self.num_head = 8
         self.hidden_size = 256
         self.encoder_num = 2
+        self.seq_len = 512

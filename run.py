@@ -10,10 +10,10 @@ device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
 
 def main(net_name):
-
+    print(net_name)
     assert net_name in net_dict
 
-    train_conf = net_dict['train_conf']
+    train_conf = net_dict['train_conf']()
     train_conf.device = device
 
     net_class = net_dict[net_name]['net']
@@ -24,7 +24,8 @@ def main(net_name):
     vocab_size = len(mydataset.vocab)
 
     net_config.vocab_size = vocab_size
-    net_config.seq_len = num_label
+    net_config.out_dim = num_label
+    net_config.device = device
 
     net = net_class(net_config).to(device)
     clf = DlClassifier(
@@ -39,5 +40,5 @@ def main(net_name):
 
 if __name__ == '__main__':
     import sys
-    net_name = sys.argv[0]
+    net_name = sys.argv[1]
     main(net_name)

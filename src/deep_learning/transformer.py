@@ -19,11 +19,12 @@ class Transformer(nn.Module):
         """
         super(Transformer, self).__init__()
         self.encoder = Encoder(config.vocab_size, config.seq_len,
-                               config.embedding_dim, config.num_head, config.hidden_size)
+                               config.embedding_dim, config.num_head, config.hidden_size, config.device)
         self.fc1 = nn.Linear(config.embedding_dim * config.embedding_dim, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)
         self.encoder_num = config.encoder_num
         self.embedding_dim = config.embedding_dim
+        self.device = config.device
 
     def forward(self, x):
 
@@ -41,10 +42,10 @@ class Transformer(nn.Module):
 
 class Encoder(nn.Module):
 
-    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size):
+    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, device):
         super(Encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
-        self.position_encoding = PositionEncoding(seq_len, embedding_dim)
+        self.position_encoding = PositionEncoding(seq_len, embedding_dim, device)
         self.multi_head_atten = MultiHeadAttention(embedding_dim, num_head)
         self.position_wise_feed_forward = PositionWiseFeedForward(embedding_dim, hidden_size)
 
@@ -62,20 +63,21 @@ class Encoder(nn.Module):
 
 class PositionEncoding(nn.Module):
 
-    def __init__(self, seq_len, embedding_dim):
+    def __init__(self, seq_len, embedding_dim, device):
         super(PositionEncoding, self).__init__()
         self.pe = torch.tensor([[pos / (10000 ** (2 * i / embedding_dim))
                                  for i in range(embedding_dim)]
                                 for pos in range(seq_len)])
         self.pe[:, 0::2] = np.sin(self.pe[:, 0::2])
         self.pe[:, 1::2] = np.cos(self.pe[:, 1::2])
+        self.device = device
 
     def forward(self, x):
 
         # assert x.size() == self.pe.size()
         # print(x.size(), self.pe.size())
 
-        return x + nn.Parameter(self.pe, requires_grad=False).to('cuda')
+        return x + nn.Parameter(self.pe, requires_grad=False).to(self.device)
 
 
 class ScaledDotProductAttention(nn.Module):

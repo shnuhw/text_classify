@@ -106,7 +106,7 @@ class Classifier:
         with torch.no_grad():
             for item in data_iter:
                 texts = item.text.to(self.device)
-                labels = item.labelto(self.device)
+                labels = item.label.to(self.device)
                 outputs = self.net(texts)
                 loss = nn.functional.cross_entropy(outputs, labels)
                 loss_total += loss
