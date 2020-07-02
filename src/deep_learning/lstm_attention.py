@@ -17,7 +17,7 @@ class TextLSTMAttention(nn.Module):
         :param config: Object
              vocab_size
              input_size
-             output_dim
+             out_dim
              dropout
              embedding_dim=300
              hidden_size=256
@@ -33,10 +33,10 @@ class TextLSTMAttention(nn.Module):
                             bidirectional=True)
         self.dropout = nn.Dropout(p=config.dropout)
         self.linear = nn.Linear(config.hidden_size*2, 64)
-        self.linear2 = nn.Linear(64, config.output_dim)
+        self.linear2 = nn.Linear(64, config.out_dim)
         self.softmax = nn.Softmax()
         self.tanh = nn.Tanh()
-        self.w = nn.Parameter(torch.Tensor(config.hidden_size * 2), requires_grad=True)
+        self.w = nn.Parameter(torch.rand(config.hidden_size * 2), requires_grad=True)
 
     def forward(self, x):
         embedding = self.embedding(x)

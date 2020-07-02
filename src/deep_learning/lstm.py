@@ -7,7 +7,7 @@
 import torch
 from torch import nn
 
-"vocab_size, input_size, output_dim, embedding_dim=300, hidden_size=256, num_layers=1"
+"vocab_size, input_size, out_dim, embedding_dim=300, hidden_size=256, num_layers=1"
 
 
 class TextLSTM(nn.Module):
@@ -18,7 +18,7 @@ class TextLSTM(nn.Module):
         :param config: Object
             vocab_size
             input_size
-            output_dim
+            out_dim
             embedding_dim=300
             hidden_size=256
             num_layers=1
@@ -30,7 +30,7 @@ class TextLSTM(nn.Module):
                             num_layers=config.num_layers,
                             bidirectional=True)
         self.dropout = nn.Dropout()
-        self.linear = nn.Linear(config.hidden_size*2*config.seq_len, config.output_dim)
+        self.linear = nn.Linear(config.hidden_size*2*config.seq_len, config.out_dim)
         self.softmax = nn.Softmax()
 
     def forward(self, x):

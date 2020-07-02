@@ -15,10 +15,10 @@ class Transformer(nn.Module):
         """
 
         :param config: Object
-        vocab_size, seq_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim
+        vocab_size, max_len, embedding_dim, num_head, hidden_size, encoder_num, out_dim
         """
         super(Transformer, self).__init__()
-        self.encoder = Encoder(config.vocab_size, config.seq_len,
+        self.encoder = Encoder(config.vocab_size, config.max_len,
                                config.embedding_dim, config.num_head, config.hidden_size, config.device)
         self.fc1 = nn.Linear(config.embedding_dim * config.embedding_dim, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)

@@ -17,11 +17,20 @@ class TrainConfig:
         self.reduce_lr_patience = 2
         self.max_len = 512
         self.train_file_dir = './data'
-        self.model_dir = './model/test_transformer1'
+        self.model_dir = './model/test'
         self.cuda = True
 
 
 class LSTMConfig:
+
+    def __init__(self):
+        self.embedding_dim = 300
+        self.max_len = 512
+        self.hidden_size = 256
+        self.num_layers = 1
+
+
+class LSTMAttentionConfig:
 
     def __init__(self):
         self.embedding_dim = 300
@@ -47,4 +56,4 @@ class TransformerConfig:
         self.num_head = 8
         self.hidden_size = 256
         self.encoder_num = 2
-        self.seq_len = 512
+        self.max_len = 512

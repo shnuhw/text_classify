@@ -16,7 +16,7 @@ class TextCNN(nn.Module):
 
         :param config: Object
             vocab_size
-            class_num
+            out_dim
             embedding_dim=256,
             num_filters=128,
             filter_sizes=(2, 3, 4, 5),
@@ -28,7 +28,7 @@ class TextCNN(nn.Module):
         self.convs = nn.ModuleList([nn.Conv2d(1, config.num_filters, (k, config.embedding_dim))
                                     for k in config.filter_sizes])
         self.dropout = nn.Dropout(config.dropout)
-        self.linear = nn.Linear(config.num_filters * len(config.filter_sizes), config.class_num)
+        self.linear = nn.Linear(config.num_filters * len(config.filter_sizes), config.out_dim)
 
     @staticmethod
     def conv_and_pool(x, conv):

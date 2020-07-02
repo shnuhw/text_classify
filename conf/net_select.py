@@ -17,7 +17,7 @@ net_dict = {
     },
     'lstmAttention': {
         'net': lstm_attention.TextLSTMAttention,
-        'conf': LSTMConfig
+        'conf': LSTMAttentionConfig
     },
     'transformer': {
         'net': transformer.Transformer,
