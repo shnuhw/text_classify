@@ -45,5 +45,6 @@ class TextLSTMAttention(nn.Module):
         alpha = F.softmax(torch.matmul(m, self.w), dim=1).unsqueeze(-1)
         out = F.relu(torch.sum(output * alpha, 1))
         linear_output = self.linear(out)
+        linear_output = self.dropout(linear_output)
         linear_output = self.linear2(linear_output)
         return linear_output

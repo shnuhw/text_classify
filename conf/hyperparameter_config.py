@@ -17,7 +17,7 @@ class TrainConfig:
         self.reduce_lr_patience = 2
         self.max_len = 512
         self.train_file_dir = './data'
-        self.model_dir = './model/test'
+        self.model_dir = './model/test_lstm_attention'
         self.cuda = True
 
 
@@ -37,6 +37,7 @@ class LSTMAttentionConfig:
         self.max_len = 512
         self.hidden_size = 256
         self.num_layers = 1
+        self.dropout = 0.2
 
 
 class TextCNNConfig:
