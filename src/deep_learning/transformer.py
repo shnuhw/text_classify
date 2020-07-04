@@ -21,7 +21,7 @@ class Transformer(nn.Module):
         self.encoder = Encoder(config.vocab_size, config.max_len,
                                config.embedding_dim, config.num_head, config.hidden_size, config.device,
                                config.d_k, config.d_v)
-        self.fc1 = nn.Linear(config.embedding_dim * config.embedding_dim, config.embedding_dim)
+        self.fc1 = nn.Linear(config.embedding_dim * config.hidden_size, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)
         self.encoder_num = config.encoder_num
         self.embedding_dim = config.embedding_dim
@@ -56,7 +56,7 @@ class Encoder(nn.Module):
             out = self.position_encoding(embedding)
         else:
             out = x
-        out = self.multi_head_atten(out)
+        out = self.multi_head_atten(out, out, out)
         out = self.position_wise_feed_forward(out)
 
         return out
@@ -99,7 +99,7 @@ class MultiHeadAttention(nn.Module):
 
     def __init__(self, embedding_dim, num_head, k_v, k_d):
         super(MultiHeadAttention, self).__init__()
-        assert embedding_dim % num_head == 0
+        # assert embedding_dim % num_head == 0
         self.fc_WQ = nn.Linear(embedding_dim, num_head * k_v)
         self.fc_WK = nn.Linear(embedding_dim, num_head * k_v)
         self.fc_WV = nn.Linear(embedding_dim, num_head * k_d)
@@ -119,16 +119,17 @@ class MultiHeadAttention(nn.Module):
 
         self.layer_norm = nn.LayerNorm(embedding_dim)
 
-    def forward(self, x):
-        batch_size = x.size(0)
-        Q = self.fc_WQ(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
-        K = self.fc_WK(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
-        V = self.fc_WV(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
+    def forward(self, Q, K, V):
+        batch_size, q_len, k_len, v_len = Q.size(0), Q.size(1), K.size(1), V.size(1)
+        residual = Q
+        Q = self.fc_WQ(Q).view(batch_size, q_len, self.num_head, self.k_v)
+        K = self.fc_WK(K).view(batch_size, k_len, self.num_head, self.k_v)
+        V = self.fc_WV(V).view(batch_size, v_len, self.num_head, self.k_d)
         Q, K, V= Q.transpose(1, 2), K.transpose(1, 2), V.transpose(1, 2)
-        attern = self.attention(Q, K, V).transpose(1, 2).contiguous().view(batch_size, self.embedding_dim, -1)
+        attern = self.attention(Q, K, V).transpose(1, 2).contiguous().view(batch_size, q_len, -1)
         out = self.fc_last(attern)
 
-        out = out + x  # 残差连接
+        out = out + residual  # 残差连接
         out = self.layer_norm(out)
         return out
 
