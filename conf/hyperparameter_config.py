@@ -58,3 +58,5 @@ class TransformerConfig:
         self.hidden_size = 256
         self.encoder_num = 2
         self.max_len = 512
+        self.d_k = 64
+        self.d_v = 128

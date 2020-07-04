@@ -19,7 +19,8 @@ class Transformer(nn.Module):
         """
         super(Transformer, self).__init__()
         self.encoder = Encoder(config.vocab_size, config.max_len,
-                               config.embedding_dim, config.num_head, config.hidden_size, config.device)
+                               config.embedding_dim, config.num_head, config.hidden_size, config.device,
+                               config.d_k, config.d_v)
         self.fc1 = nn.Linear(config.embedding_dim * config.embedding_dim, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)
         self.encoder_num = config.encoder_num
@@ -42,11 +43,11 @@ class Transformer(nn.Module):
 
 class Encoder(nn.Module):
 
-    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, device):
+    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, device, d_k, d_v):
         super(Encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.position_encoding = PositionEncoding(seq_len, embedding_dim, device)
-        self.multi_head_atten = MultiHeadAttention(embedding_dim, num_head)
+        self.multi_head_atten = MultiHeadAttention(embedding_dim, num_head, d_k, d_v)
         self.position_wise_feed_forward = PositionWiseFeedForward(embedding_dim, hidden_size)
 
     def forward(self, x, is_zero=False):
@@ -89,42 +90,43 @@ class ScaledDotProductAttention(nn.Module):
         self.k_dim = k_dim
 
     def forward(self, K, Q, V):
-        out = self.softmax(torch.matmul(Q, K.permute(0, 2, 1))/math.sqrt(self.k_dim))
+        out = self.softmax(torch.matmul(Q, K.permute(0, 1, 3, 2))/math.sqrt(self.k_dim))
         out = torch.matmul(out, V)
         return out
 
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, embedding_dim, num_head):
+    def __init__(self, embedding_dim, num_head, k_v, k_d):
         super(MultiHeadAttention, self).__init__()
         assert embedding_dim % num_head == 0
-        self.fc_WQ = nn.Linear(embedding_dim, embedding_dim)
-        self.fc_WK = nn.Linear(embedding_dim, embedding_dim)
-        self.fc_WV = nn.Linear(embedding_dim, embedding_dim)
+        self.fc_WQ = nn.Linear(embedding_dim, num_head * k_v)
+        self.fc_WK = nn.Linear(embedding_dim, num_head * k_v)
+        self.fc_WV = nn.Linear(embedding_dim, num_head * k_d)
 
         self.num_head = num_head
+        self.k_v = k_v
+        self.k_d = k_d
         self.head_dim = embedding_dim // self.num_head
-        self.head_WQ = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
-        self.head_WK = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
-        self.head_WV = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        # self.head_WQ = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        # self.head_WK = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
+        # self.head_WV = nn.ModuleList([nn.Linear(embedding_dim, self.head_dim) for i in range(self.num_head)])
         self.embedding_dim = embedding_dim
 
         self.attention = ScaledDotProductAttention(self.head_dim)
 
-        self.fc_last = nn.Linear(embedding_dim, embedding_dim)
+        self.fc_last = nn.Linear(num_head * k_d, embedding_dim)
 
         self.layer_norm = nn.LayerNorm(embedding_dim)
 
     def forward(self, x):
-        Q = self.fc_WQ(x)
-        K = self.fc_WK(x)
-        V = self.fc_WV(x)
-        attention_list = []
-        for q, k, v in zip(self.head_WQ, self.head_WK, self.head_WV):
-            attention_list.append(self.attention(q(Q), k(K), v(V)))
-        Z = torch.cat(attention_list, dim=2)
-        out = self.fc_last(Z)
+        batch_size = x.size(0)
+        Q = self.fc_WQ(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
+        K = self.fc_WK(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
+        V = self.fc_WV(x).view(batch_size, self.embedding_dim, self.num_head, self.k_v)
+        Q, K, V= Q.transpose(1, 2), K.transpose(1, 2), V.transpose(1, 2)
+        attern = self.attention(Q, K, V).transpose(1, 2).contiguous().view(batch_size, self.embedding_dim, -1)
+        out = self.fc_last(attern)
 
         out = out + x  # 残差连接
         out = self.layer_norm(out)
