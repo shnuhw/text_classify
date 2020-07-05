@@ -4,3 +4,4 @@
 src/models/deep_learning/__pycache__
 nohup.out
 .DS_Store
+.vscode

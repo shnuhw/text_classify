@@ -37,7 +37,7 @@ class Classifier:
             self.model = None
             self.vocab = None
         else:
-            self.model = self.net.load_state_dict(torch.load(self.model_path)) 
+            self.model = self.net.load_state_dict(torch.load(self.model_path))
             self.vocab = pickle.load(open(self.vocab_path, 'rb'))
 
     def train(self):
@@ -59,7 +59,7 @@ class Classifier:
             print('Epoch [{}/{}]'.format(epoch + 1, num_epochs))
 
             for index, train_item in enumerate(train_iter):
-                
+
                 inputs = train_item.text.to(self.device)
                 labels = train_item.label.to(self.device)
 
@@ -95,7 +95,8 @@ class Classifier:
                     time_batch_start = time.time()
                 batch_count += 1
             time_epoch_cost = time.time() - time_epoch_start
-            print('Epoch [{}/{}] Time cost: {:6.4}'.format(epoch + 1, num_epochs, time_epoch_cost))
+            print('Epoch [{}/{}] Time cost: {:6.4}'.format(epoch +
+                                                           1, num_epochs, time_epoch_cost))
             time_epoch_start = time.time()
 
     def evaluate(self, data_iter):
@@ -124,7 +125,8 @@ class Classifier:
 
     def predict(self, text, device='cpu'):
 
-        text_vec = torch.tensor([[self.vocab.stoi[char] for char in text]], dtype=torch.long).to(device)
+        text_vec = torch.tensor([[self.vocab.stoi[char]
+                                  for char in text]], dtype=torch.long).to(device)
         with torch.no_grad():
             outputs = self.net(text_vec)
             # labels = labels.data.cpu().numpy()
@@ -143,5 +145,3 @@ class Config:
         self.eval_file_name = 'valid.csv'
         self.num_epoch = 20
         self.cuda = False
-
-
