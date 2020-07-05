@@ -15,7 +15,7 @@ class TrainConfig:
         self.early_stopping_patience = 8
         self.reduce_lr_factor = 0.1
         self.reduce_lr_patience = 2
-        self.max_len = 256
+        self.max_len = 512
         self.train_file_dir = './data'
         self.model_dir = './model/test_transformer1'
         self.cuda = True
@@ -57,6 +57,6 @@ class TransformerConfig:
         self.num_head = 8
         self.hidden_size = 256
         self.encoder_num = 2
-        self.max_len = 256
+        self.max_len = 512
         self.d_k = 64
         self.d_v = 64

@@ -21,7 +21,7 @@ class Transformer(nn.Module):
         self.encoder = Encoder(config.vocab_size, config.max_len,
                                config.embedding_dim, config.num_head, config.hidden_size, config.device,
                                config.d_k, config.d_v)
-        self.fc1 = nn.Linear(config.embedding_dim * config.hidden_size, config.embedding_dim)
+        self.fc1 = nn.Linear(config.embedding_dim * config.max_len, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)
         self.encoder_num = config.encoder_num
         self.embedding_dim = config.embedding_dim
