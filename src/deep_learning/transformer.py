@@ -20,7 +20,7 @@ class Transformer(nn.Module):
         super(Transformer, self).__init__()
         self.encoder = Encoder(config.vocab_size, config.max_len,
                                config.embedding_dim, config.num_head, config.hidden_size, config.device,
-                               config.d_k, config.d_v)
+                               config.d_k, config.d_v, config.weight_matrix)
         self.fc1 = nn.Linear(config.embedding_dim * config.max_len, config.embedding_dim)
         self.fc2 = nn.Linear(config.embedding_dim, config.out_dim)
         self.encoder_num = config.encoder_num
@@ -43,9 +43,10 @@ class Transformer(nn.Module):
 
 class Encoder(nn.Module):
 
-    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, device, d_k, d_v):
+    def __init__(self, vocab_size, seq_len, embedding_dim, num_head, hidden_size, device, d_k, d_v, weight_matrix):
         super(Encoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.embedding.weight.data.copy_(weight_matrix)
         self.position_encoding = PositionEncoding(seq_len, embedding_dim, device)
         self.multi_head_atten = MultiHeadAttention(embedding_dim, num_head, d_k, d_v)
         self.position_wise_feed_forward = PositionWiseFeedForward(embedding_dim, hidden_size)

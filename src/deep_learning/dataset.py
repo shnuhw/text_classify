@@ -5,6 +5,7 @@
 
 import pandas as pd
 from torchtext import data
+from torchtext.vocab import GloVe, Vectors
 import torch
 import pickle
 
@@ -23,7 +24,7 @@ class DataSet:
         self._init_dataset(root_dir_path, train_file_name, test_file_name, val_file_name)
 
     def _init_dataset(self, root_dir_parh, train_file_path, test_file_path,
-                      val_file_path, w2v_file_path=None):
+                      val_file_path, w2v_file_path=None, w2v_cache_path=None):
         def tokenizer(text):
             return [word for word in text]
 
@@ -39,7 +40,11 @@ class DataSet:
                                                                                              test=test_file_path,
                                                                                              format='csv',
                                                                                              fields=datafields)
-        TEXT.build_vocab(self.train_dataset)
+        vectors = Vectors(
+            name=w2v_file_path,
+            cache=w2v_cache_path
+        )
+        TEXT.build_vocab(self.train_dataset, vectors=vectors)
         LABLE.build_vocab(self.train_dataset)
         self.vocab = TEXT.vocab
         self.label_vocab = LABLE.vocab

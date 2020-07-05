@@ -26,6 +26,7 @@ def main(net_name):
     net_config.vocab_size = vocab_size
     net_config.out_dim = num_label
     net_config.device = device
+    net_config.weight_matrix = mydataset.vocab.vectors
 
     net = net_class(net_config).to(device)
     clf = DlClassifier(
