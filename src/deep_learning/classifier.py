@@ -44,7 +44,7 @@ class Classifier:
 
         self.net.train()
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.Adam(self.net.parameters(), lr=0.001)
+        optimizer = optim.Adam(self.net.parameters(), lr=0.0001)
 
         train_iter, test_iter, eval_iter = self.dataset.get_batch_data()
         pickle.dump(self.dataset.vocab, open(self.vocab_path, 'wb'))
