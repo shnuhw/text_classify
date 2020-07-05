@@ -18,6 +18,8 @@ class TrainConfig:
         self.max_len = 512
         self.train_file_dir = './data'
         self.model_dir = './model/test_transformer1'
+        self.w2v_cache_path = './data/_cache'
+        self.w2v_file_path = './data/sgns.sogou.char'
         self.cuda = True
 
 

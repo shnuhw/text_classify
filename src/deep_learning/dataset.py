@@ -12,7 +12,8 @@ import pickle
 
 class DataSet:
 
-    def __init__(self, max_length, batch_size, root_dir_path, train_file_name='train.csv', test_file_name='test.csv',
+    def __init__(self, max_length, batch_size, w2v_file_path, w2v_cache_path, root_dir_path,
+                 train_file_name='train.csv', test_file_name='test.csv',
                  val_file_name='valid.csv'):
         self.max_len = max_length
         self.batchsize = batch_size
@@ -21,7 +22,14 @@ class DataSet:
         self.eval_dataset = None
         self.vocab = []
         self.embedding = {}
-        self._init_dataset(root_dir_path, train_file_name, test_file_name, val_file_name)
+        self._init_dataset(
+            root_dir_path,
+            train_file_name,
+            test_file_name,
+            val_file_name,
+            w2v_file_path,
+            w2v_cache_path
+        )
 
     def _init_dataset(self, root_dir_parh, train_file_path, test_file_path,
                       val_file_path, w2v_file_path=None, w2v_cache_path=None):
@@ -73,7 +81,13 @@ class DataSet:
 
 
 if __name__ == '__main__':
-    ds = DataSet(20, 10, '../../../data/', 'train.csv', 'test.csv', 'valid.csv')
+    ds = DataSet(
+        20,
+        10,
+        '../../../data/',
+        'train.csv',
+        'test.csv',
+        'valid.csv')
 
     a, b, c = ds.get_batch_data()
     # pickle.dump(ds, open('./dataset.pkl', 'wb'))

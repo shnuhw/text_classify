@@ -19,7 +19,11 @@ def main(net_name):
     net_class = net_dict[net_name]['net']
     net_config = net_dict[net_name]['conf']()
 
-    mydataset = dataset.DataSet(train_conf.max_len, train_conf.batch_size, train_conf.train_file_dir)
+    mydataset = dataset.DataSet(train_conf.max_len,
+                                train_conf.batch_size,
+                                train_conf.w2v_file_path,
+                                train_conf.w2v_cache_path,
+                                train_conf.train_file_dir)
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
 
