@@ -25,6 +25,7 @@ class TextCNN(nn.Module):
 
         super(TextCNN, self).__init__()
         self.embedding = nn.Embedding(config.vocab_size, config.embedding_dim)
+        self.embedding.weight.data.copy_(config.weight_matrix)
         self.convs = nn.ModuleList([nn.Conv2d(1, config.num_filters, (k, config.embedding_dim))
                                     for k in config.filter_sizes])
         self.dropout = nn.Dropout(config.dropout)
