@@ -4,7 +4,9 @@
 # time: 2020/6/24 16:47
 
 from transformers import AutoTokenizer, AutoModelWithLMHead
-from transformers import BertModel
+from transformers import BertModel 
+from transformers import BertConfig as BertConfigBase
+
 
 class TrainConfig:
 
@@ -69,5 +71,6 @@ class TransformerConfig:
 class BertConfig:
 
     def __init__(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("./bert_model/bert-base-chinese/")
-        self.bert = BertModel.from_pretrained('./bert_model/bert-base-chinese/')
+        model_config = BertConfigBase.from_pretrained("./data/bert_model/bert-base-chinese/", output_hidden_states=True)
+        self.tokenizer = AutoTokenizer.from_pretrained("./data/bert_model/bert-base-chinese/", config=model_config)
+        self.bert = BertModel.from_pretrained('./data/bert_model/bert-base-chinese/', config=model_config)
