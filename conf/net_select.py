@@ -3,7 +3,7 @@
 # file: net_select.py
 # time: 2020/7/1 22:12
 
-from src.deep_learning import lstm_attention, lstm, text_cnn, transformer
+from src.deep_learning import lstm_attention, lstm, text_cnn, transformer, bert
 from .hyperparameter_config import *    # import all conf
 
 net_dict = {
@@ -23,6 +23,9 @@ net_dict = {
         'net': transformer.Transformer,
         'conf': TransformerConfig
     },
-
+    'bert':{
+        'net': bert.Bert,
+        'conf': BertConfig
+    },
     'train_conf': TrainConfig
 }

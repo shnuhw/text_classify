@@ -14,7 +14,7 @@ class DataSet:
 
     def __init__(self, max_length, batch_size, w2v_file_path, w2v_cache_path, root_dir_path,
                  train_file_name='train.csv', test_file_name='test.csv',
-                 val_file_name='valid.csv'):
+                 val_file_name='valid.csv', tokenizer=None):
         self.max_len = max_length
         self.batchsize = batch_size
         self.train_dataset = None
@@ -30,19 +30,26 @@ class DataSet:
             w2v_file_path,
             w2v_cache_path
         )
+        self.tokenizer = tokenizer
 
-    def _init_dataset(self, root_dir_parh, train_file_path, test_file_path,
+    def _init_dataset(self, root_dir_path, train_file_path, test_file_path,
                       val_file_path, w2v_file_path=None, w2v_cache_path=None):
         def tokenizer(text):
             return [word for word in text]
 
-        TEXT = data.Field(sequential=True, tokenize=tokenizer, lower=True,
-                          batch_first=True,
-                          fix_length=self.max_len)
+        if self.tokenizer:
+            PAD_INDEX = self.tokenizer.convert_tokens_to_ids(self.tokenizer.pad_token)
+            UNK_INDEX = self.tokenizer.convert_tokens_to_ids(self.tokenizer.unk_token)
+            TEXT = data.Field(sequential=True, tokenize=self.tokenizer.encode, lower=True, use_vocab=False,
+                              batch_first=True, fix_length=self.max_len, pad_token=PAD_INDEX, unk_token=UNK_INDEX)
+        else:
+            TEXT = data.Field(sequential=True, tokenize=tokenizer, lower=True,
+                              batch_first=True,
+                              fix_length=self.max_len)
         LABLE = data.Field(sequential=False, use_vocab=True)
         datafields = [(None, None), ("title", None), ("text", TEXT),
                       ("label", LABLE), ("file_name", None)]
-        self.train_dataset, self.val_dataset, self.test_dataset = data.TabularDataset.splits(path=root_dir_parh,
+        self.train_dataset, self.val_dataset, self.test_dataset = data.TabularDataset.splits(path=root_dir_path,
                                                                                              train=train_file_path,
                                                                                              validation=val_file_path,
                                                                                              test=test_file_path,

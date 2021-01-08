@@ -3,6 +3,8 @@
 # file: hyperparameter_config.py
 # time: 2020/6/24 16:47
 
+from transformers import AutoTokenizer, AutoModelWithLMHead
+from transformers import BertModel
 
 class TrainConfig:
 
@@ -62,3 +64,10 @@ class TransformerConfig:
         self.max_len = 512
         self.d_k = 64
         self.d_v = 64
+
+
+class BertConfig:
+
+    def __init__(self):
+        self.tokenizer = AutoTokenizer.from_pretrained("./bert_model/bert-base-chinese/")
+        self.bert = BertModel.from_pretrained('./bert_model/bert-base-chinese/')

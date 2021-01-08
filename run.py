@@ -23,7 +23,8 @@ def main(net_name):
                                 train_conf.batch_size,
                                 train_conf.w2v_file_path,
                                 train_conf.w2v_cache_path,
-                                train_conf.train_file_dir)
+                                train_conf.train_file_dir,
+                                tokenizer=net_config.tokenizer)
     num_label = len(mydataset.label_vocab)
     vocab_size = len(mydataset.vocab)
 
